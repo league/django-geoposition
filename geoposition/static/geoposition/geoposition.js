@@ -17,15 +17,38 @@ if (jQuery != undefined) {
                 $addressRow = $('<div class="geoposition-address" />'),
                 $searchRow = $('<div class="geoposition-search" />'),
                 $searchInput = $('<input>', {'type': 'search', 'placeholder': 'Search …'}),
+                $clearBtn = $('<input>', {'type': 'button',
+                                          'class': 'geoposition-clear',
+                                          'value': 'Clear location'}),
+                $recenterBtn = $('<input>', {'type': 'button',
+                                             'class': 'geoposition-recenter',
+                                             'value': 'Re-center map'}),
                 $latitudeField = $container.find('input.geoposition:eq(0)'),
                 $longitudeField = $container.find('input.geoposition:eq(1)'),
                 latitude = parseFloat($latitudeField.val()) || 0,
                 longitude = parseFloat($longitudeField.val()) || 0,
+                zoomOut = 2,
+                zoomIn = 16,
                 map,
                 mapLatLng,
                 mapOptions,
                 marker;
 
+            $clearBtn.bind('click', function(e) {
+                e.preventDefault();
+                latitude = longitude = 0;
+                $latitudeField.val('0');
+                $longitudeField.val('0');
+                mapLatLng = new google.maps.LatLng(latitude, longitude);
+                marker.setPosition(mapLatLng);
+                map.panTo(mapLatLng);
+                map.setZoom(zoomOut);
+            });
+
+            $recenterBtn.bind('click', function(e) {
+                e.preventDefault();
+                map.panTo(marker.getPosition());
+            });
 
             $searchInput.bind('keydown', function(e) {
                 if (e.keyCode == 13) {
@@ -42,7 +65,7 @@ if (jQuery != undefined) {
                                     map.fitBounds(result.geometry.bounds);
                                 } else {
                                     map.panTo(result.geometry.location);
-                                    map.setZoom(18);
+                                    map.setZoom(zoomIn);
                                 }
                                 marker.setPosition(result.geometry.location);
                                 google.maps.event.trigger(marker, 'dragend');
@@ -70,12 +93,12 @@ if (jQuery != undefined) {
                 $(this).parent().find('ul.geoposition-results').remove();
             });
             $searchInput.appendTo($searchRow);
-            $container.append($mapContainer, $addressRow, $searchRow);
+            $container.append($clearBtn, $recenterBtn, $mapContainer, $addressRow, $searchRow);
 
             mapLatLng = new google.maps.LatLng(latitude, longitude);
             mapOptions = $.extend({}, mapDefaults, {
                 'center': mapLatLng,
-                'zoom': latitude && longitude ? 15 : 1
+                'zoom': latitude && longitude ? zoomIn : zoomOut
             });
             map = new google.maps.Map($mapContainer.get(0), mapOptions);
             marker = new google.maps.Marker({

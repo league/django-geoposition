@@ -4,6 +4,10 @@
     margin: 6px 0;
 }
 
+.geoposition-widget input[type=button] {
+    margin-left: 8px;
+}
+
 .geoposition-address, .geoposition-search {
     width: 50%;
 }
